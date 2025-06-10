@@ -529,17 +529,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (downloadPromptsButton) {
         downloadPromptsButton.onclick = () => {
-            let content = "--- PROMPT GAMBAR ---\\n\\n";
+            const sections: string[] = [];
             const imageItems = imagePromptVariationsDiv.querySelectorAll('.variation-item pre');
-            imageItems.forEach((item) => { 
-                content += `${item.textContent || ''}\\n\\n`;
-            });
-
-            content += "\\n--- PROMPT VIDEO ---\\n\\n";
             const videoItems = videoPromptVariationsDiv.querySelectorAll('.variation-item pre');
-            videoItems.forEach((item) => { 
-                content += `${item.textContent || ''}\\n\\n`;
-            });
+
+            if (imageItems.length > 0) {
+                let imageSectionContent = "--- PROMPT GAMBAR ---\n\n"; // Header + 1 baris kosong
+                const prompts = Array.from(imageItems).map(item => item.textContent || '');
+                imageSectionContent += prompts.join('\n\n'); // Setiap prompt dipisahkan 1 baris kosong
+                sections.push(imageSectionContent);
+            }
+
+            if (videoItems.length > 0) {
+                let videoSectionContent = "--- PROMPT VIDEO ---\n\n"; // Header + 1 baris kosong
+                const prompts = Array.from(videoItems).map(item => item.textContent || '');
+                videoSectionContent += prompts.join('\n\n'); // Setiap prompt dipisahkan 1 baris kosong
+                sections.push(videoSectionContent);
+            }
+
+            // Gabungkan bagian-bagian dengan 1 baris kosong di antaranya
+            // (\n\n karena setiap bagian sudah diakhiri teks, bukan newline tambahan untuk pemisah)
+            let content = sections.join('\n\n'); 
+            
+            if (content) { // Jika ada konten
+                content += '\n'; // Tambahkan satu baris baru di akhir file
+            } else {
+                content = '\n'; // Untuk file kosong, hanya satu baris baru
+            }
 
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
